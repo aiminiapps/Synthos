@@ -1,36 +1,151 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SYNTHOS
 
-## Getting Started
+> Web3 AI Training & Reward Platform
 
-First, run the development server:
+SYNTHOS is a decentralized platform where users train AI systems by completing micro-tasks and earn crypto rewards. Built with Next.js, WalletConnect, and Supabase.
+
+## 🌟 Features
+
+### Core Functionality
+- **🔗 Web3 Wallet Integration** - Connect via WalletConnect (MetaMask, Rainbow, etc.)
+- **🎯 AI Training Tasks** - Complete data labeling, sentiment analysis, and validation tasks
+- **💰 Token Rewards** - Earn SYNTH tokens for every contribution
+- **📊 Reputation System** - Level up from Beginner to Master Contributor
+- **🏆 Leaderboard** - Compete with other contributors globally
+- **📈 Progress Tracking** - Monitor your contributions, rewards, and level
+
+### Gamification
+- 5-tier reputation system with reward multipliers
+- Beginner → Verified Trainer → AI Guardian → Data Architect → Master Contributor
+- Point-based progression (10-50 points per task based on difficulty)
+- Multipliers from 1.0x to 2.0x rewards
+
+### Task Types (MVP)
+- Crypto News Sentiment Analysis
+- DeFi Risk Assessment
+- Wallet Behavior Classification
+- AI Prediction Verification
+- Yield Strategy Selection
+- Market Outlook Voting
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Node.js 18+
+- Supabase account
+- WalletConnect Cloud account
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Configure environment variables
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the landing page.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ⚙️ Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See [SETUP.md](./SETUP.md) for detailed setup instructions including:
+- Supabase project creation and schema setup
+- WalletConnect configuration
+- Environment variable setup
+- Troubleshooting guide
 
-## Learn More
+### Required Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# WalletConnect
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your-project-id
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🏗️ Project Structure
 
-## Deploy on Vercel
+```
+synthos/
+├── app/
+│   ├── api/              # Backend API routes
+│   ├── ai/              # AI dashboard page
+│   └── page.js          # Landing page
+├── components/          # React components
+├── lib/                 # Utilities & configs
+├── supabase/           # Database schema
+└── tailwind.config.js  # Custom theme
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🎨 Design System
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Color Palette
+
+- **Neon Green Brand**: `#C6FF1A` (primary), `#D8FF4D` (bright), `#A6E80F` (soft)
+- **Industrial Backgrounds**: `#0B0F0C` to `#1C2320` (dark variations)
+- **Functional**: Success `#3DFF7A`, Warning `#FFE66D`, Error `#FF5A5A`
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS v4
+- **Animations**: Framer Motion
+- **Web3**: WalletConnect, wagmi, viem
+- **Backend**: Supabase (PostgreSQL)
+- **Language**: JavaScript
+
+## 📝 API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/profile?address={wallet}` | GET | Get or create user profile |
+| `/api/tasks` | GET | Fetch available tasks |
+| `/api/submit` | POST | Submit task answer |
+| `/api/rewards?address={wallet}` | GET | Get reward history |
+| `/api/leaderboard` | GET | Get top contributors |
+
+## 🔐 Security Notes
+
+**For MVP/Testing:**
+- Reward transactions are currently simulated
+- Token transfers are mocked for development
+
+**For Production:**
+- Implement proper RLS policies in Supabase
+- Set up dedicated reward wallet
+- Integrate real ERC-20 token transfers
+- Add rate limiting and abuse prevention
+
+## 🚧 Roadmap
+
+### Phase 1: MVP ✅
+- Landing page with wallet connection
+- AI dashboard with task feed
+- Reputation system & leaderboard
+- Simulated rewards
+
+### Phase 2: Production
+- Real token contract deployment
+- On-chain reward distribution
+- Task creation admin dashboard
+
+### Phase 3: Enhancement
+- Daily missions & streaks
+- User badges & achievements
+- Staking & DAO governance
+
+## 📄 License
+
+MIT License
+
+---
+
+Built with 💚 by the SYNTHOS team
