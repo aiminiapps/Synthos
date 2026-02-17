@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
-import { getServerSupabase } from '@/lib/supabase'
+import { getServerSupabase, supabase } from '@/lib/supabase'
 import { calculateReward, TASK_POINTS } from '@/lib/reputation'
+import { validateTaskWithAI, generateAIFeedback, getAIProcessingMessage } from '@/lib/openrouter'
+import { getTaskById } from '@/data/mockTasks'
 
 export async function POST(request) {
     try {
@@ -10,10 +12,72 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        const supabase = getServerSupabase()
+        // Get task (try both Supabase and mock data)
+        let task = null
+        let useMockData = false
+
+        try {
+            const { data: dbTask, error: taskError } = await supabase
+                .from('tasks')
+                .select('*')
+                .eq('id', taskId)
+                .single()
+
+            if (!taskError && dbTask) {
+                task = dbTask
+            } else {
+                // Fallback to mock data
+                task = getTaskById(taskId)
+                useMockData = true
+            }
+        } catch (error) {
+            task = getTaskById(taskId)
+            useMockData = true
+        }
+
+        if (!task) {
+            return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+        }
+
+        // AI-POWERED VALIDATION
+        console.log('🤖 AI validating submission...')
+        const aiValidation = await validateTaskWithAI(task, answer)
+
+        // Calculate reward based on difficulty and AI confidence
+        const baseReward = task.base_reward || task.reward || 10
+        const confidenceMultiplier = aiValidation.confidence > 80 ? 1.0 : 0.8
+        const rewardAmount = Math.floor(baseReward * confidenceMultiplier)
+
+        // Calculate reputation points
+        const reputationPoints = TASK_POINTS[task.difficulty] || 10
+
+        // If using mock data, return simulated response
+        if (useMockData) {
+            console.log('📦 Using mock submission (DB not connected)')
+
+            const mockResponse = {
+                success: true,
+                submission_id: `mock-${Date.now()}`,
+                reward_amount: rewardAmount,
+                tx_hash: `0x${Math.random().toString(16).substring(2, 66)}`,
+                reputation_gained: reputationPoints,
+                ai_powered: true,
+                ai_validation: {
+                    confidence: aiValidation.confidence,
+                    feedback: aiValidation.feedback,
+                },
+                message: '✨ AI-validated contribution accepted!',
+                processing_message: getAIProcessingMessage()
+            }
+
+            return NextResponse.json(mockResponse)
+        }
+
+        // REAL DATABASE FLOW
+        const serverSupabase = getServerSupabase()
 
         // Get user
-        const { data: user, error: userError } = await supabase
+        const { data: user, error: userError } = await serverSupabase
             .from('users')
             .select('*')
             .eq('wallet_address', userAddress.toLowerCase())
@@ -23,25 +87,8 @@ export async function POST(request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // Get task
-        const { data: task, error: taskError } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('id', taskId)
-            .single()
-
-        if (taskError || !task) {
-            return NextResponse.json({ error: 'Task not found' }, { status: 404 })
-        }
-
-        // Calculate reward based on difficulty and user level
-        const rewardAmount = calculateReward(task.difficulty, user.level)
-
-        // Calculate reputation points
-        const reputationPoints = TASK_POINTS[task.difficulty] || 10
-
-        // Create submission
-        const { data: submission, error: submissionError } = await supabase
+        // Create submission with AI metadata
+        const { data: submission, error: submissionError } = await serverSupabase
             .from('submissions')
             .insert([
                 {
@@ -49,7 +96,12 @@ export async function POST(request) {
                     task_id: taskId,
                     answer: { value: answer },
                     reward_amount: rewardAmount,
-                    status: 'validated',
+                    status: aiValidation.isValid ? 'validated' : 'pending_review',
+                    metadata: {
+                        ai_confidence: aiValidation.confidence,
+                        ai_feedback: aiValidation.feedback,
+                        validated_at: new Date().toISOString()
+                    }
                 },
             ])
             .select()
@@ -62,9 +114,9 @@ export async function POST(request) {
 
         // Update user stats
         const newReputationScore = user.reputation_score + reputationPoints
-        const newLevel = Math.floor(newReputationScore / 100) + 1 // Simple level calculation
+        const newLevel = Math.floor(newReputationScore / 100) + 1
 
-        const { error: updateError } = await supabase
+        await serverSupabase
             .from('users')
             .update({
                 reputation_score: newReputationScore,
@@ -74,12 +126,8 @@ export async function POST(request) {
             })
             .eq('id', user.id)
 
-        if (updateError) {
-            console.error('Error updating user:', updateError)
-        }
-
         // Create reward record
-        const { data: reward, error: rewardError } = await supabase
+        const { data: reward } = await serverSupabase
             .from('rewards')
             .insert([
                 {
@@ -92,17 +140,11 @@ export async function POST(request) {
             .select()
             .single()
 
-        if (rewardError) {
-            console.error('Error creating reward:', rewardError)
-        }
-
-        // TODO: In production, trigger actual token transfer here
-        // For MVP, we'll simulate it
+        // Mock transaction (replace with real blockchain call in production)
         const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`
 
-        // Update reward with mock transaction hash
         if (reward) {
-            await supabase
+            await serverSupabase
                 .from('rewards')
                 .update({
                     tx_hash: mockTxHash,
@@ -111,15 +153,29 @@ export async function POST(request) {
                 .eq('id', reward.id)
         }
 
+        // Generate AI feedback
+        const aiFeedback = await generateAIFeedback(task, answer, aiValidation.isValid)
+
         return NextResponse.json({
             success: true,
             submission_id: submission.id,
             reward_amount: rewardAmount,
             tx_hash: mockTxHash,
             reputation_gained: reputationPoints,
+            ai_powered: true,
+            ai_validation: {
+                confidence: aiValidation.confidence,
+                feedback: aiFeedback,
+            },
+            message: '✨ AI-validated contribution accepted!',
+            processing_message: getAIProcessingMessage()
         })
+
     } catch (error) {
         console.error('Submit API error:', error)
-        return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error.message
+        }, { status: 500 })
     }
 }

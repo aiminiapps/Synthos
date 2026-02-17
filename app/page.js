@@ -33,16 +33,16 @@ export default function HomePage() {
     ]
 
     return (
-        <div className="min-h-screen bg-industrial-black">
+        <div className="min-h-screen bg-industrial-black mesh-bg">
             {/* Header */}
-            <header className="fixed top-0 w-full z-50 glass-effect">
+            <header className="fixed top-0 w-full z-50 glass-elevated border-b border-gray-divider">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         className="text-2xl font-bold"
                     >
-                        <span className="text-neon">SYNTHOS</span>
+                        <span className="text-neon text-glow">SYNTHOS</span>
                     </motion.div>
                     <WalletButton />
                 </div>
@@ -59,7 +59,7 @@ export default function HomePage() {
                         <h1 className="text-6xl md:text-8xl font-black mb-6 leading-tight">
                             Train AI,
                             <br />
-                            <span className="text-neon text-glow">Earn Crypto</span>
+                            <span className="text-neon text-glow animate-glow-pulse">Earn Crypto</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-gray-secondary mb-8 max-w-3xl mx-auto">
                             Join the decentralized AI revolution. Complete micro-tasks, improve AI systems,
@@ -77,7 +77,7 @@ export default function HomePage() {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => router.push('/ai')}
-                            className="px-8 py-4 bg-neon hover:bg-neon-bright text-industrial-black font-bold text-lg rounded-lg transition-all duration-200 flex items-center gap-2 group shadow-lg hover:shadow-neon/50"
+                            className="px-8 py-4 bg-gradient-neon text-industrial-black font-bold text-lg rounded-lg transition-all duration-200 flex items-center gap-2 group shadow-neon-lg hover:shadow-neon"
                         >
                             Enter Dashboard
                             <RiArrowRightLine className="text-xl group-hover:translate-x-1 transition-transform" />
@@ -96,8 +96,8 @@ export default function HomePage() {
                             { value: '$250K+', label: 'Rewards Distributed' },
                             { value: '1M+', label: 'Tasks Completed' },
                         ].map((stat, index) => (
-                            <div key={index} className="glass-effect p-6 rounded-xl">
-                                <div className="text-4xl font-black text-neon mb-2">{stat.value}</div>
+                            <div key={index} className="card-luxury p-6 rounded-xl">
+                                <div className="text-4xl font-black text-neon mb-2 text-glow-soft">{stat.value}</div>
                                 <div className="text-gray-secondary">{stat.label}</div>
                             </div>
                         ))}
