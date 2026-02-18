@@ -74,18 +74,18 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-industrial-black">
+        <div className="min-h-screen bg-industrial-black mesh-bg">
             {/* Header */}
-            <header className="sticky top-0 z-50 glass-effect border-b border-gray-border">
+            <header className="sticky top-0 z-50 glass-elevated border-b border-gray-divider">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         onClick={() => router.push('/')}
-                        className="text-2xl font-bold cursor-pointer"
+                        className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
                     >
-                        <span className="text-neon">SYNTHOS</span>
-                        <span className="text-gray-muted text-sm ml-3">AI Dashboard</span>
+                        <span className="text-neon text-glow">SYNTHOS</span>
+                        <span className="text-gray-muted text-sm ml-3 border-l border-gray-divider pl-3">AI Dashboard</span>
                     </motion.div>
                     <WalletButton />
                 </div>
@@ -98,14 +98,14 @@ export default function DashboardPage() {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="glass-effect p-6 rounded-xl"
+                        className="card-luxury p-6 rounded-xl"
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <RiCoinLine className="text-2xl text-neon" />
-                            <span className="text-gray-muted text-sm">Reward Balance</span>
+                            <RiCoinLine className="text-2xl text-neon drop-shadow-md" />
+                            <span className="text-gray-secondary text-sm font-medium">Reward Balance</span>
                         </div>
-                        <div className="text-3xl font-bold text-neon">
-                            {userProfile?.total_rewards || 0} <span className="text-lg">SYNTH</span>
+                        <div className="text-3xl font-black text-neon text-glow-soft">
+                            {userProfile?.total_rewards || 0} <span className="text-lg opacity-80">SYNTH</span>
                         </div>
                     </motion.div>
 
@@ -113,13 +113,13 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="glass-effect p-6 rounded-xl"
+                        className="glass-effect p-6 rounded-xl border border-gray-border/50"
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <RiBriefcaseLine className="text-2xl text-success" />
-                            <span className="text-gray-muted text-sm">Contributions</span>
+                            <span className="text-gray-secondary text-sm font-medium">Contributions</span>
                         </div>
-                        <div className="text-3xl font-bold">
+                        <div className="text-3xl font-bold text-gray-primary">
                             {userProfile?.total_contributions || 0}
                         </div>
                     </motion.div>
@@ -128,13 +128,13 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="glass-effect p-6 rounded-xl"
+                        className="glass-effect p-6 rounded-xl border border-gray-border/50"
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <RiTrophyLine className="text-2xl text-warning" />
-                            <span className="text-gray-muted text-sm">Level</span>
+                            <span className="text-gray-secondary text-sm font-medium">Level</span>
                         </div>
-                        <div className="text-3xl font-bold">
+                        <div className="text-3xl font-bold text-gray-primary">
                             {userProfile?.level || 1}
                         </div>
                     </motion.div>
@@ -143,13 +143,13 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="glass-effect p-6 rounded-xl"
+                        className="glass-effect p-6 rounded-xl border border-gray-border/50"
                     >
                         <div className="flex items-center gap-3 mb-2">
                             <RiFlashlightLine className="text-2xl text-neon-soft" />
-                            <span className="text-gray-muted text-sm">Reputation</span>
+                            <span className="text-gray-secondary text-sm font-medium">Reputation</span>
                         </div>
-                        <div className="text-3xl font-bold">
+                        <div className="text-3xl font-bold text-gray-primary">
                             {userProfile?.reputation_score || 0}
                         </div>
                     </motion.div>

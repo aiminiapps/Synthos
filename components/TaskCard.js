@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RiCheckLine, RiCloseLine } from 'react-icons/ri'
+import { RiCheckLine, RiCloseLine, RiCoinLine } from 'react-icons/ri'
 import RewardAnimation from './RewardAnimation'
 
 export default function TaskCard({ task, userAddress, userLevel, onComplete }) {
@@ -71,20 +71,22 @@ export default function TaskCard({ task, userAddress, userLevel, onComplete }) {
                 layout
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-effect p-6 rounded-xl hover:border-neon/50 transition-all cursor-pointer"
+                className={`card-luxury p-6 rounded-xl hover:border-neon/50 transition-all cursor-pointer group ${isExpanded ? 'border-neon/40 shadow-neon-sm' : ''}`}
                 onClick={() => !isExpanded && setIsExpanded(true)}
             >
                 {/* Task Header */}
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getDifficultyColor(task.difficulty)}`}>
+                        <div className="flex items-center gap-3 mb-3">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold tracking-wide border bg-industrial-black/50 ${getDifficultyColor(task.difficulty)}`}>
                                 {task.difficulty.toUpperCase()}
                             </span>
-                            <span className="text-neon font-semibold">+{task.base_reward} SYNTH</span>
+                            <span className="text-neon font-bold flex items-center gap-1 drop-shadow-sm">
+                                <RiCoinLine /> +{task.base_reward} SYNTH
+                            </span>
                         </div>
-                        <h3 className="text-xl font-bold mb-1">{task.title}</h3>
-                        <p className="text-gray-secondary text-sm">{task.description}</p>
+                        <h3 className="text-xl font-bold mb-2 text-gray-primary group-hover:text-neon transition-colors">{task.title}</h3>
+                        <p className="text-gray-secondary text-sm leading-relaxed">{task.description}</p>
                     </div>
                 </div>
 
@@ -95,59 +97,71 @@ export default function TaskCard({ task, userAddress, userLevel, onComplete }) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="mt-4 pt-4 border-t border-gray-border"
+                            className="mt-6 pt-6 border-t border-gray-divider"
                         >
                             {/* Options */}
-                            <div className="space-y-3 mb-4">
+                            <div className="space-y-3 mb-6">
                                 {task.options?.map((option, index) => (
                                     <motion.button
                                         key={index}
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                        whileHover={{ scale: 1.01, x: 4 }}
+                                        whileTap={{ scale: 0.99 }}
                                         onClick={(e) => {
                                             e.stopPropagation()
                                             setSelectedAnswer(option)
                                         }}
-                                        className={`w-full p-4 rounded-lg border-2 transition-all text-left ${selectedAnswer === option
-                                                ? 'border-neon bg-neon/10'
-                                                : 'border-gray-border hover:border-gray-muted'
+                                        className={`w-full p-4 rounded-xl border transition-all text-left flex items-center justify-between group ${selectedAnswer === option
+                                            ? 'border-neon bg-neon/10 shadow-neon-sm'
+                                            : 'border-gray-border bg-industrial-black/30 hover:border-neon/30 hover:bg-industrial-dark'
                                             }`}
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <span>{option}</span>
-                                            {selectedAnswer === option && (
+                                        <span className={`font-medium ${selectedAnswer === option ? 'text-neon' : 'text-gray-secondary group-hover:text-gray-primary'}`}>
+                                            {option}
+                                        </span>
+                                        {selectedAnswer === option && (
+                                            <motion.div
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                            >
                                                 <RiCheckLine className="text-neon text-xl" />
-                                            )}
-                                        </div>
+                                            </motion.div>
+                                        )}
                                     </motion.button>
                                 ))}
                             </div>
 
                             {/* Action Buttons */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-4">
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         handleSubmit()
                                     }}
                                     disabled={!selectedAnswer || isSubmitting}
-                                    className="flex-1 px-6 py-3 bg-neon hover:bg-neon-bright text-industrial-black font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-6 py-4 bg-gradient-neon text-industrial-black font-bold text-lg rounded-xl transition-all shadow-neon hover:shadow-neon-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex justify-center items-center gap-2"
                                 >
-                                    {isSubmitting ? 'Processing...' : 'Submit Contribution'}
+                                    {isSubmitting ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-industrial-black border-t-transparent rounded-full animate-spin" />
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        'Submit Contribution'
+                                    )}
                                 </motion.button>
                                 <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         setIsExpanded(false)
                                         setSelectedAnswer(null)
                                     }}
-                                    className="px-6 py-3 border-2 border-gray-border hover:border-error text-gray-text hover:text-error font-semibold rounded-lg transition-all"
+                                    className="px-6 py-4 border border-gray-border hover:border-error/50 text-gray-secondary hover:text-error font-semibold rounded-xl transition-all bg-industrial-black/50"
                                 >
-                                    <RiCloseLine className="text-xl" />
+                                    <RiCloseLine className="text-2xl" />
                                 </motion.button>
                             </div>
                         </motion.div>

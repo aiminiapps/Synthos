@@ -14,6 +14,21 @@ import {
 
 export default function WalletButton() {
     const [isMounted, setIsMounted] = useState(false)
+
+    // Prevent SSR issues - mount first
+    useEffect(() => {
+        setIsMounted(true)
+    }, [])
+
+    // Don't render anything until mounted (prevents hook initialization errors)
+    if (!isMounted) {
+        return null
+    }
+
+    return <WalletButtonContent />
+}
+
+function WalletButtonContent() {
     const { open } = useWeb3Modal()
     const { address, isConnected, chain } = useAccount()
     const { disconnect } = useDisconnect()
@@ -22,11 +37,6 @@ export default function WalletButton() {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [isAuthenticating, setIsAuthenticating] = useState(false)
     const [showChainWarning, setShowChainWarning] = useState(false)
-
-    // Prevent SSR issues
-    useEffect(() => {
-        setIsMounted(true)
-    }, [])
 
     // Check authentication status on mount and when address changes
     useEffect(() => {
@@ -98,16 +108,6 @@ export default function WalletButton() {
     const truncateAddress = (addr) => {
         if (!addr) return ''
         return `${addr.slice(0, 6)}...${addr.slice(-4)}`
-    }
-
-    // Don't render on server
-    if (!isMounted) {
-        return (
-            <button className="flex items-center gap-2 px-6 py-3 font-semibold rounded-lg bg-neon text-industrial-black border-2 border-neon">
-                <RiWalletLine className="text-xl" />
-                <span>Connect Wallet</span>
-            </button>
-        )
     }
 
     return (

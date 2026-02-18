@@ -56,14 +56,16 @@ export default function LeaderboardTable({ currentUserAddress }) {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-effect p-6 rounded-xl"
+            className="glass-elevated p-6 rounded-xl border border-gray-divider"
         >
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <RiTrophyLine className="text-neon" />
-                Top Contributors
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="p-2 bg-warning/10 rounded-lg">
+                    <RiTrophyLine className="text-xl text-warning" />
+                </div>
+                <span>Top Contributors</span>
             </h3>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
                 {leaderboard.length > 0 ? (
                     leaderboard.slice(0, 10).map((user, index) => {
                         const rank = index + 1
@@ -75,41 +77,44 @@ export default function LeaderboardTable({ currentUserAddress }) {
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className={`flex items-center gap-3 p-3 rounded-lg transition-all ${isCurrentUser
-                                        ? 'bg-neon/10 border-2 border-neon'
-                                        : 'bg-industrial-surface hover:bg-industrial-elevated'
+                                whileHover={{ scale: 1.02 }}
+                                className={`flex items-center gap-4 p-4 rounded-xl transition-all border ${isCurrentUser
+                                    ? 'bg-neon/5 border-neon/30 shadow-neon-sm'
+                                    : 'bg-industrial-surface/50 border-transparent hover:border-gray-border hover:bg-industrial-surface'
                                     }`}
                             >
                                 {/* Rank */}
-                                <div className="w-8 flex items-center justify-center">
+                                <div className="w-8 flex items-center justify-center font-bold">
                                     {getMedalIcon(rank)}
                                 </div>
 
                                 {/* Address */}
                                 <div className="flex-1">
-                                    <div className={`font-semibold ${isCurrentUser ? 'text-neon' : 'text-gray-text'}`}>
+                                    <div className={`font-bold font-mono ${isCurrentUser ? 'text-neon' : 'text-gray-primary'}`}>
                                         {truncateAddress(user.wallet_address)}
                                         {isCurrentUser && (
-                                            <span className="ml-2 text-xs text-neon">(You)</span>
+                                            <span className="ml-2 text-[10px] uppercase bg-neon text-industrial-black px-2 py-0.5 rounded-full font-bold">You</span>
                                         )}
                                     </div>
-                                    <div className="text-xs text-gray-muted">
-                                        Level {user.level} • {user.total_contributions} contributions
+                                    <div className="text-xs text-gray-muted mt-1 flex items-center gap-2">
+                                        <span className="bg-industrial-black px-1.5 py-0.5 rounded border border-gray-border">Lvl {user.level}</span>
+                                        <span>•</span>
+                                        <span>{user.total_contributions} tasks</span>
                                     </div>
                                 </div>
 
                                 {/* Score */}
                                 <div className="text-right">
-                                    <div className="font-bold text-neon">{user.reputation_score}</div>
-                                    <div className="text-xs text-gray-muted">points</div>
+                                    <div className="font-black text-neon text-lg">{user.reputation_score}</div>
+                                    <div className="text-[10px] font-bold text-gray-muted uppercase tracking-wider">PTS</div>
                                 </div>
                             </motion.div>
                         )
                     })
                 ) : (
-                    <div className="text-center py-8 text-gray-secondary">
+                    <div className="text-center py-12 text-gray-secondary">
                         <p>No contributors yet</p>
-                        <p className="text-sm text-gray-muted mt-1">Be the first!</p>
+                        <p className="text-sm text-gray-muted mt-2">Be the first to climb the ranks!</p>
                     </div>
                 )}
             </div>
