@@ -105,7 +105,7 @@ export default function DashboardPage() {
                             <span className="text-gray-secondary text-sm font-medium">Reward Balance</span>
                         </div>
                         <div className="text-3xl font-black text-neon text-glow-soft">
-                            {userProfile?.total_rewards || 0} <span className="text-lg opacity-80">SYNTH</span>
+                            {userProfile?.total_rewards || 0} <span className="text-lg opacity-80">SYNTR</span>
                         </div>
                     </motion.div>
 

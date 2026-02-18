@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSupabase, supabase } from '@/lib/supabase'
 import { calculateReward, TASK_POINTS } from '@/lib/reputation'
 import { validateTaskWithAI, generateAIFeedback, getAIProcessingMessage } from '@/lib/openrouter'
+import { sendSYNTRReward } from '@/lib/tokenReward'
 import { getTaskById } from '@/data/mockTasks'
 
 export async function POST(request) {
@@ -26,7 +27,6 @@ export async function POST(request) {
             if (!taskError && dbTask) {
                 task = dbTask
             } else {
-                // Fallback to mock data
                 task = getTaskById(taskId)
                 useMockData = true
             }
@@ -51,26 +51,42 @@ export async function POST(request) {
         // Calculate reputation points
         const reputationPoints = TASK_POINTS[task.difficulty] || 10
 
-        // If using mock data, return simulated response
+        // ─── REAL SYNTR TOKEN TRANSFER ─────────────────────────────────────────
+        console.log(`💸 Sending ${rewardAmount} SYNTR to ${userAddress}...`)
+        const transferResult = await sendSYNTRReward(userAddress, rewardAmount)
+
+        const txHash = transferResult.success
+            ? transferResult.txHash
+            : `0x${Math.random().toString(16).substring(2, 66)}` // fallback mock hash if transfer fails
+
+        if (transferResult.success) {
+            console.log(`✅ SYNTR transfer confirmed: ${txHash}`)
+        } else {
+            console.warn(`⚠️ SYNTR transfer failed (${transferResult.error}) — recording reward as pending`)
+        }
+        // ───────────────────────────────────────────────────────────────────────
+
+        // If using mock data, return response (with real tx if transfer succeeded)
         if (useMockData) {
             console.log('📦 Using mock submission (DB not connected)')
 
-            const mockResponse = {
+            return NextResponse.json({
                 success: true,
                 submission_id: `mock-${Date.now()}`,
                 reward_amount: rewardAmount,
-                tx_hash: `0x${Math.random().toString(16).substring(2, 66)}`,
+                tx_hash: txHash,
+                transfer_success: transferResult.success,
                 reputation_gained: reputationPoints,
                 ai_powered: true,
                 ai_validation: {
                     confidence: aiValidation.confidence,
                     feedback: aiValidation.feedback,
                 },
-                message: '✨ AI-validated contribution accepted!',
+                message: transferResult.success
+                    ? `✨ ${rewardAmount} SYNTR sent to your wallet!`
+                    : '✨ AI-validated contribution accepted! Reward pending.',
                 processing_message: getAIProcessingMessage()
-            }
-
-            return NextResponse.json(mockResponse)
+            })
         }
 
         // REAL DATABASE FLOW
@@ -87,21 +103,16 @@ export async function POST(request) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 })
         }
 
-        // Create submission with AI metadata
+        // Create submission record
         const { data: submission, error: submissionError } = await serverSupabase
             .from('submissions')
             .insert([
                 {
                     user_id: user.id,
                     task_id: taskId,
-                    answer: { value: answer },
+                    answer: { value: answer, ai_confidence: aiValidation.confidence, ai_feedback: aiValidation.feedback },
                     reward_amount: rewardAmount,
                     status: aiValidation.isValid ? 'validated' : 'pending_review',
-                    metadata: {
-                        ai_confidence: aiValidation.confidence,
-                        ai_feedback: aiValidation.feedback,
-                        validated_at: new Date().toISOString()
-                    }
                 },
             ])
             .select()
@@ -126,7 +137,7 @@ export async function POST(request) {
             })
             .eq('id', user.id)
 
-        // Create reward record
+        // Create reward record with real tx hash
         const { data: reward } = await serverSupabase
             .from('rewards')
             .insert([
@@ -134,24 +145,12 @@ export async function POST(request) {
                     user_id: user.id,
                     submission_id: submission.id,
                     amount: rewardAmount,
-                    status: 'pending',
+                    tx_hash: txHash,
+                    status: transferResult.success ? 'sent' : 'pending',
                 },
             ])
             .select()
             .single()
-
-        // Mock transaction (replace with real blockchain call in production)
-        const mockTxHash = `0x${Math.random().toString(16).substring(2, 66)}`
-
-        if (reward) {
-            await serverSupabase
-                .from('rewards')
-                .update({
-                    tx_hash: mockTxHash,
-                    status: 'sent',
-                })
-                .eq('id', reward.id)
-        }
 
         // Generate AI feedback
         const aiFeedback = await generateAIFeedback(task, answer, aiValidation.isValid)
@@ -160,14 +159,17 @@ export async function POST(request) {
             success: true,
             submission_id: submission.id,
             reward_amount: rewardAmount,
-            tx_hash: mockTxHash,
+            tx_hash: txHash,
+            transfer_success: transferResult.success,
             reputation_gained: reputationPoints,
             ai_powered: true,
             ai_validation: {
                 confidence: aiValidation.confidence,
                 feedback: aiFeedback,
             },
-            message: '✨ AI-validated contribution accepted!',
+            message: transferResult.success
+                ? `✨ ${rewardAmount} SYNTR sent to your wallet!`
+                : '✨ AI-validated contribution accepted! Reward pending.',
             processing_message: getAIProcessingMessage()
         })
 
@@ -179,3 +181,4 @@ export async function POST(request) {
         }, { status: 500 })
     }
 }
+

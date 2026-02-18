@@ -17,7 +17,7 @@ export default function HomePage() {
         {
             icon: RiTokenSwapLine,
             title: 'Earn Crypto Rewards',
-            description: 'Receive SYNTH tokens directly to your wallet for every contribution you make'
+            description: 'Receive SYNTR tokens directly to your wallet for every contribution you make'
         },
         {
             icon: RiShieldStarLine,

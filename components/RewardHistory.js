@@ -86,7 +86,7 @@ export default function RewardHistory({ userAddress }) {
                                     {getStatusIcon(reward.status)}
                                 </div>
                                 <div>
-                                    <div className="font-semibold text-neon">+{reward.amount} SYNTH</div>
+                                    <div className="font-semibold text-neon">+{reward.amount} SYNTR</div>
                                     <div className="text-xs text-gray-muted">
                                         {new Date(reward.created_at).toLocaleDateString()}
                                     </div>
