@@ -7,13 +7,14 @@ import { getTaskById } from '@/data/mockTasks'
 
 export async function POST(request) {
     try {
-        const { taskId, answer, userAddress } = await request.json()
+        // taskData is sent by client for AI-generated tasks not in the DB/mockTasks
+        const { taskId, answer, userAddress, taskData: inlineTaskData } = await request.json()
 
         if (!taskId || !answer || !userAddress) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
         }
 
-        // Get task (try both Supabase and mock data)
+        // Get task: DB → mockTasks → inline (for AI-generated tasks)
         let task = null
         let useMockData = false
 
@@ -33,6 +34,13 @@ export async function POST(request) {
         } catch (error) {
             task = getTaskById(taskId)
             useMockData = true
+        }
+
+        // Fallback: use inline task data sent from client (AI-generated tasks)
+        if (!task && inlineTaskData) {
+            task = inlineTaskData
+            useMockData = true
+            console.log('📦 Using inline task data for AI-generated task:', taskId)
         }
 
         if (!task) {

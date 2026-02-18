@@ -76,15 +76,15 @@ Return ONLY a valid JSON array (no markdown, no explanation, start with [ end wi
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a creative task designer for a crypto AI training platform. Always return valid JSON arrays only. Never include markdown code blocks or explanations.'
+                    content: 'You are a creative task designer for a crypto AI training platform. Always return valid JSON arrays only. Never include markdown code blocks, backticks, or explanations. Start your response with [ and end with ].'
                 },
                 {
                     role: 'user',
                     content: prompt
                 }
             ],
-            temperature: 0.85,
-            max_tokens: 2500,
+            temperature: 0.75,
+            max_tokens: 4000,
         })
 
         const content = response.choices[0]?.message?.content?.trim()
@@ -93,23 +93,59 @@ Return ONLY a valid JSON array (no markdown, no explanation, start with [ end wi
             throw new Error('Empty response from AI model')
         }
 
-        console.log('🤖 AI raw response preview:', content.substring(0, 300))
+        console.log('🤖 AI raw response preview:', content.substring(0, 400))
 
-        // Robustly extract JSON array (handles markdown code blocks)
-        let tasks
-        try {
-            tasks = JSON.parse(content)
-        } catch {
-            const jsonMatch = content.match(/\[[\s\S]*\]/)
-            if (!jsonMatch) {
-                throw new Error(`No JSON array in response. Got: ${content.substring(0, 150)}`)
+        // ─── Robust multi-strategy JSON extractor ────────────────────────────
+        let tasks = null
+
+        // Strategy 1: direct parse (model returned clean JSON)
+        try { tasks = JSON.parse(content) } catch { }
+
+        // Strategy 2: extract JSON array with regex
+        if (!tasks) {
+            const arrMatch = content.match(/\[[\s\S]*\]/)
+            if (arrMatch) {
+                try { tasks = JSON.parse(arrMatch[0]) } catch { }
             }
-            tasks = JSON.parse(jsonMatch[0])
         }
 
-        if (!Array.isArray(tasks)) {
-            throw new Error('AI response is not a JSON array')
+        // Strategy 3: model returned a single object — wrap it
+        if (!tasks) {
+            const objMatch = content.match(/\{[\s\S]*\}/)
+            if (objMatch) {
+                try { tasks = [JSON.parse(objMatch[0])] } catch { }
+            }
         }
+
+        // Strategy 4: extract multiple objects via brace-counting
+        if (!tasks) {
+            const extracted = []
+            let depth = 0, start = -1
+            for (let i = 0; i < content.length; i++) {
+                if (content[i] === '{') {
+                    if (depth === 0) start = i
+                    depth++
+                } else if (content[i] === '}') {
+                    depth--
+                    if (depth === 0 && start !== -1) {
+                        try {
+                            const obj = JSON.parse(content.slice(start, i + 1))
+                            if (obj.title) extracted.push(obj)
+                        } catch { }
+                        start = -1
+                    }
+                }
+            }
+            if (extracted.length > 0) tasks = extracted
+        }
+
+        if (!tasks || (Array.isArray(tasks) && tasks.length === 0)) {
+            throw new Error(`Could not extract valid tasks from AI response. Preview: ${content.substring(0, 200)}`)
+        }
+
+        // Ensure it's an array
+        if (!Array.isArray(tasks)) tasks = [tasks]
+
 
         // Sanitize each task
         const sanitized = tasks.slice(0, count).map((task, i) => ({

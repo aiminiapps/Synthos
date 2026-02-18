@@ -74,7 +74,14 @@ function TaskItem({ task, userAddress, userLevel, onComplete, index }) {
             const res = await fetch('/api/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ taskId: task.id, answer: selectedAnswer, userAddress }),
+                body: JSON.stringify({
+                    taskId: task.id,
+                    answer: selectedAnswer,
+                    userAddress,
+                    // Send full task object so server can handle AI-generated tasks
+                    // that don't exist in the DB or mockTasks
+                    taskData: task.ai_generated ? task : undefined,
+                }),
             })
             const data = await res.json()
 
