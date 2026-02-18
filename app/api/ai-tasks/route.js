@@ -1,140 +1,163 @@
 import { NextResponse } from 'next/server'
+import OpenAI from 'openai'
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1'
+// ─── OpenRouter client (OpenAI-compatible) ────────────────────────────────────
+const openai = new OpenAI({
+    baseURL: 'https://openrouter.ai/api/v1',
+    apiKey: process.env.OPENROUTER_API_KEY,
+    defaultHeaders: {
+        'HTTP-Referer': 'https://synthos.ai',
+        'X-Title': 'SYNTHOS AI Training Platform',
+    },
+})
+
+// ─── Category context for richer prompts ─────────────────────────────────────
+const CATEGORY_PROMPTS = {
+    sentiment: 'crypto market sentiment analysis — news headlines, whale movements, exchange listings, regulatory news, social media posts about DeFi/NFT/blockchain. Use real events like ETF approvals, exchange hacks, celebrity endorsements.',
+    risk: 'DeFi protocol risk assessment — smart contract security, liquidity pool analysis, bridge security, stablecoin stability, rug pull indicators. Include specific TVL numbers, audit status, team details.',
+    tagging: 'blockchain data classification — wallet behavior patterns, transaction recognition, token categorization, on-chain data labeling. Use MEV bots, wash trading, mixer services, whale wallets.',
+    prediction: 'crypto price prediction validation — market trend forecasting, on-chain metrics, technical analysis signals. Use RSI, MACD, funding rates, open interest, fear & greed index with real numbers.',
+    research: 'protocol research & analysis — tokenomics review, whitepaper quality, team credibility, market opportunity sizing. Include vesting schedules, distribution percentages, team backgrounds.',
+    validation: 'AI output validation — trading signal accuracy, smart contract code review, AI summary fact-checking. Validate AI-generated predictions and summaries against known facts.',
+    creative: 'crypto content quality rating — AI-generated tweets, educational threads, marketing copy, explainer articles. Rate clarity, accuracy, engagement potential.',
+}
+
+const REWARD_BY_DIFFICULTY = { easy: 10, medium: 30, hard: 50 }
+const TIME_BY_DIFFICULTY = { easy: '1-2 min', medium: '2-4 min', hard: '4-6 min' }
 
 /**
  * POST /api/ai-tasks
- * Generate AI-powered tasks dynamically using OpenRouter
+ * Generate AI-powered tasks using OpenAI SDK → OpenRouter → Llama 4 Maverick
  */
 export async function POST(request) {
     try {
-        const { category, difficulty, count = 3 } = await request.json()
+        const { category = 'sentiment', difficulty = 'medium', count = 3 } = await request.json()
 
-        if (!OPENROUTER_API_KEY) {
-            return NextResponse.json({ error: 'OpenRouter API key not configured' }, { status: 500 })
+        if (!process.env.OPENROUTER_API_KEY) {
+            return NextResponse.json({ error: 'OPENROUTER_API_KEY not configured' }, { status: 500 })
         }
 
-        const categoryPrompts = {
-            sentiment: 'crypto market sentiment analysis, news headlines, social media posts about DeFi/NFT/blockchain',
-            risk: 'DeFi protocol risk, smart contract security, liquidity pool analysis, investment risk assessment',
-            tagging: 'blockchain wallet behavior classification, transaction pattern recognition, token categorization',
-            prediction: 'crypto price prediction validation, market trend forecasting, on-chain metric interpretation',
-            research: 'tokenomics analysis, whitepaper review, team credibility assessment, market opportunity sizing',
-            validation: 'AI-generated trading signals, smart contract code review, AI summary accuracy checking',
-            creative: 'rating AI-generated crypto content, evaluating educational threads, assessing marketing copy'
-        }
+        const catContext = CATEGORY_PROMPTS[category] || CATEGORY_PROMPTS.sentiment
+        const reward = REWARD_BY_DIFFICULTY[difficulty] || 30
+        const timeEst = TIME_BY_DIFFICULTY[difficulty] || '2-4 min'
 
-        const prompt = `Generate ${count} unique data labeling tasks for a crypto AI training platform called SYNTHOS. 
-Category: ${category} (${categoryPrompts[category] || 'general crypto analysis'})
-Difficulty: ${difficulty || 'medium'}
+        const prompt = `You are a task designer for SYNTHOS, a crypto AI training platform where users label data to train AI models and earn SYNTR tokens.
 
-Each task should:
-- Be specific and realistic (use real crypto scenarios)
-- Have exactly 5 answer options
-- Be completable in 1-5 minutes
-- Train AI models to understand crypto/blockchain data
+Generate ${count} unique, realistic data labeling tasks for the "${category}" category at "${difficulty}" difficulty.
 
-Return ONLY a valid JSON array with this exact structure:
+CONTEXT: ${catContext}
+
+REQUIREMENTS:
+- Use REAL crypto protocols (Uniswap, Aave, Binance, Ethereum, Solana, Chainlink, etc.)
+- Include specific numbers, percentages, dates to make scenarios authentic
+- Each task needs EXACTLY 5 distinct answer options
+- Tasks should be educational and completable in ${timeEst}
+- Make each scenario different — no repetition
+
+Return ONLY a valid JSON array (no markdown, no explanation, start with [ end with ]):
 [
   {
-    "id": "ai-${category}-${Date.now()}-1",
-    "title": "Task title here",
-    "description": "Detailed scenario description with specific numbers/data",
+    "title": "Short specific title under 65 chars",
+    "description": "Detailed realistic scenario with specific data points and context. 2-3 sentences.",
     "options": ["Option 1", "Option 2", "Option 3", "Option 4", "Option 5"],
-    "difficulty": "${difficulty || 'medium'}",
-    "base_reward": ${difficulty === 'easy' ? 10 : difficulty === 'hard' ? 50 : 30},
-    "estimated_time": "X min",
+    "difficulty": "${difficulty}",
+    "base_reward": ${reward},
+    "estimated_time": "${timeEst}",
     "category": "${category}",
     "task_type": "${category}",
     "ai_powered": true,
     "ai_generated": true,
     "min_level": 1
   }
-]
+]`
 
-Return ONLY the JSON array, no markdown, no explanation.`
-
-        const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://synthos.ai',
-                'X-Title': 'SYNTHOS AI Training Platform',
-            },
-            body: JSON.stringify({
-                model: 'mistralai/mistral-7b-instruct:free',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a task generator for a crypto AI training platform. Generate realistic, specific data labeling tasks. Always return valid JSON only.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                temperature: 0.8,
-                max_tokens: 2000,
-            })
+        const response = await openai.chat.completions.create({
+            model: 'meta-llama/llama-4-maverick',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'You are a creative task designer for a crypto AI training platform. Always return valid JSON arrays only. Never include markdown code blocks or explanations.'
+                },
+                {
+                    role: 'user',
+                    content: prompt
+                }
+            ],
+            temperature: 0.85,
+            max_tokens: 2500,
         })
 
-        if (!response.ok) {
-            throw new Error(`OpenRouter API error: ${response.status}`)
-        }
-
-        const data = await response.json()
-        const content = data.choices?.[0]?.message?.content
+        const content = response.choices[0]?.message?.content?.trim()
 
         if (!content) {
-            throw new Error('No content from AI')
+            throw new Error('Empty response from AI model')
         }
 
-        // Parse JSON from response (handle markdown code blocks)
+        console.log('🤖 AI raw response preview:', content.substring(0, 300))
+
+        // Robustly extract JSON array (handles markdown code blocks)
         let tasks
         try {
-            const jsonMatch = content.match(/\[[\s\S]*\]/)
-            if (jsonMatch) {
-                tasks = JSON.parse(jsonMatch[0])
-            } else {
-                tasks = JSON.parse(content)
-            }
+            tasks = JSON.parse(content)
         } catch {
-            throw new Error('Failed to parse AI response as JSON')
+            const jsonMatch = content.match(/\[[\s\S]*\]/)
+            if (!jsonMatch) {
+                throw new Error(`No JSON array in response. Got: ${content.substring(0, 150)}`)
+            }
+            tasks = JSON.parse(jsonMatch[0])
         }
 
-        // Add unique IDs to prevent collisions
-        tasks = tasks.map((task, i) => ({
-            ...task,
+        if (!Array.isArray(tasks)) {
+            throw new Error('AI response is not a JSON array')
+        }
+
+        // Sanitize each task
+        const sanitized = tasks.slice(0, count).map((task, i) => ({
             id: `ai-${category}-${Date.now()}-${i}`,
+            title: String(task.title || 'AI Generated Task').substring(0, 80),
+            description: String(task.description || ''),
+            options: Array.isArray(task.options) && task.options.length >= 4
+                ? task.options.slice(0, 5).map(String)
+                : ['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree'],
+            difficulty: task.difficulty || difficulty,
+            base_reward: Number(task.base_reward) || reward,
+            estimated_time: task.estimated_time || timeEst,
+            category: task.category || category,
+            task_type: task.task_type || category,
+            ai_powered: true,
+            ai_generated: true,
+            min_level: Number(task.min_level) || 1,
         }))
+
+        console.log(`✅ Generated ${sanitized.length} AI tasks for [${category}/${difficulty}]`)
 
         return NextResponse.json({
             success: true,
-            tasks,
+            tasks: sanitized,
+            count: sanitized.length,
+            model: 'meta-llama/llama-4-maverick',
             generated_at: new Date().toISOString(),
-            model: 'mistralai/mistral-7b-instruct:free'
         })
 
     } catch (error) {
-        console.error('AI task generation error:', error)
+        console.error('❌ AI task generation error:', error.message)
+
+        // Surface detailed error for debugging
         return NextResponse.json({
             error: 'Failed to generate AI tasks',
-            details: error.message
+            details: error.message,
+            hint: error.status === 401 ? 'Check OPENROUTER_API_KEY in .env' : undefined,
         }, { status: 500 })
     }
 }
 
-/**
- * GET /api/ai-tasks
- * Get AI task generation status
- */
 export async function GET() {
     return NextResponse.json({
         status: 'ready',
-        model: 'mistralai/mistral-7b-instruct:free',
-        supported_categories: ['sentiment', 'risk', 'tagging', 'prediction', 'research', 'validation', 'creative'],
-        api_configured: !!OPENROUTER_API_KEY
+        model: 'meta-llama/llama-4-maverick',
+        sdk: 'openai (OpenRouter-compatible)',
+        base_url: 'https://openrouter.ai/api/v1',
+        supported_categories: Object.keys(CATEGORY_PROMPTS),
+        api_configured: !!process.env.OPENROUTER_API_KEY,
     })
 }
