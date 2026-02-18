@@ -125,33 +125,95 @@ export default function DashboardPage() {
         <div className="min-h-screen bg-[#080C09]" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 0%, rgba(198,255,26,0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(96,165,250,0.03) 0%, transparent 60%)' }}>
 
             {/* ── Header ── */}
-            <header className="sticky top-0 z-50 backdrop-blur-xl border-b border-white/5 bg-[#080C09]/80">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <header className="sticky top-0 z-50">
+                {/* Floating island container */}
+                <div className="max-w-[1500px] mx-auto px-4 sm:px-6 pt-3 pb-1">
                     <motion.div
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        onClick={() => router.push('/')}
-                        className="flex items-center gap-3 cursor-pointer group"
+                        initial={{ opacity: 0, y: -16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, ease: 'easeOut' }}
+                        className="flex items-center justify-between gap-4 px-4 sm:px-5 py-3 rounded-2xl border"
+                        style={{
+                            background: 'rgba(8,12,9,0.85)',
+                            borderColor: 'rgba(255,255,255,0.08)',
+                            backdropFilter: 'blur(24px)',
+                            boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(198,255,26,0.04), inset 0 1px 0 rgba(255,255,255,0.04)',
+                        }}
                     >
-                        <div className="w-8 h-8 rounded-lg bg-[#C6FF1A]/15 border border-[#C6FF1A]/30 flex items-center justify-center">
-                            <RiRobot2Line className="text-[#C6FF1A] text-sm" />
-                        </div>
-                        <div>
-                            <span className="text-[#C6FF1A] font-black text-lg tracking-tight group-hover:opacity-80 transition-opacity">SYNTHOS</span>
-                            <span className="text-white/20 text-xs ml-2 font-medium">AI Dashboard</span>
+                        {/* ── Logo ── */}
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            onClick={() => router.push('/')}
+                            className="flex items-center gap-2.5 cursor-pointer group shrink-0"
+                        >
+                            <div
+                                className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(198,255,26,0.2), rgba(198,255,26,0.05))',
+                                    border: '1px solid rgba(198,255,26,0.3)',
+                                    boxShadow: '0 0 12px rgba(198,255,26,0.15)',
+                                }}
+                            >
+                                <RiRobot2Line className="text-[#C6FF1A] text-sm" />
+                            </div>
+                            <div className="flex items-baseline gap-1.5">
+                                <span
+                                    className="font-black text-base tracking-tight"
+                                    style={{ color: '#C6FF1A', textShadow: '0 0 20px rgba(198,255,26,0.4)' }}
+                                >
+                                    SYNTHOS
+                                </span>
+                                <span className="text-white/20 text-[10px] font-semibold uppercase tracking-widest hidden sm:inline">
+                                    AI
+                                </span>
+                            </div>
+                        </motion.div>
+
+                        {/* ── Center nav ── */}
+                        <nav className="hidden md:flex items-center gap-1">
+                            {[
+                                { label: 'Home', path: '/' },
+                                { label: 'Dashboard', path: '/ai', active: true },
+                            ].map(item => (
+                                <button
+                                    key={item.label}
+                                    onClick={() => router.push(item.path)}
+                                    className="px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all"
+                                    style={{
+                                        color: item.active ? '#C6FF1A' : 'rgba(255,255,255,0.4)',
+                                        background: item.active ? 'rgba(198,255,26,0.08)' : 'transparent',
+                                        border: item.active ? '1px solid rgba(198,255,26,0.2)' : '1px solid transparent',
+                                    }}
+                                >
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+
+                        {/* ── Right side ── */}
+                        <div className="flex items-center gap-2.5 shrink-0">
+                            {/* BSC live badge */}
+                            <div
+                                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border"
+                                style={{
+                                    borderColor: 'rgba(52,211,153,0.2)',
+                                    background: 'rgba(52,211,153,0.06)',
+                                }}
+                            >
+                                <span className="relative flex h-1.5 w-1.5 shrink-0">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#34D399] opacity-60" />
+                                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#34D399]" />
+                                </span>
+                                <span className="text-[#34D399] text-[10px] font-bold uppercase tracking-wider">BSC</span>
+                            </div>
+
+                            {/* Wallet button */}
+                            <WalletButton />
                         </div>
                     </motion.div>
-
-                    <div className="flex items-center gap-3">
-                        {/* Network badge */}
-                        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#34D399]/20 bg-[#34D399]/8">
-                            <div className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
-                            <span className="text-[#34D399] text-xs font-semibold">BSC Mainnet</span>
-                        </div>
-                        <WalletButton />
-                    </div>
                 </div>
             </header>
+
 
             {/* ── Main Content ── */}
             <div className="max-w-[1500px] mx-auto px-4 sm:px-6 py-8">
