@@ -181,7 +181,7 @@ export default function ReputationCard({ userProfile }) {
                                 boxShadow: `0 0 12px ${style.glow}`,
                             }}
                         >
-                            <RiSparklingLine className="text-xs" />
+                            {/* <RiSparklingLine className="text-xs" /> */}
                             {style.icon} {currentLevel.name}
                         </div>
 
