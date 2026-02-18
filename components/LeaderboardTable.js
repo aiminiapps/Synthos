@@ -10,6 +10,40 @@ import {
 } from 'react-icons/ri'
 import { getUserLevel } from '@/lib/reputation'
 
+// ─── Pinned elite users (always shown at top) ─────────────────────────────────
+const ELITE_USERS = [
+    {
+        id: 'elite-1',
+        wallet_address: '0x3fA8B653F9abf91428800C9Dc338d9E3e763A2E1',
+        reputation_score: 18420,
+        total_contributions: 847,
+        level: 5,
+        _elite: true,
+        _badge: '👑 Legend',
+        _badgeColor: '#C6FF1A',
+    },
+    {
+        id: 'elite-2',
+        wallet_address: '0x7dB4C6d3E1f2A8b9C0e5D4F3A2B1C8D7E6F5A4B3',
+        reputation_score: 14750,
+        total_contributions: 612,
+        level: 5,
+        _elite: true,
+        _badge: '🔥 Elite',
+        _badgeColor: '#FBBF24',
+    },
+    {
+        id: 'elite-3',
+        wallet_address: '0xA1B2C3D4E5F6A7B8C9D0E1F2A3B4C5D6E7F8A9B0',
+        reputation_score: 11380,
+        total_contributions: 489,
+        level: 5,
+        _elite: true,
+        _badge: '⚡ Pro',
+        _badgeColor: '#A78BFA',
+    },
+]
+
 // ─── Level colours (matches ReputationCard) ───────────────────────────────────
 const LEVEL_STYLES = {
     1: { color: '#9CA3AF', bg: 'bg-[#9CA3AF]/10', border: 'border-[#9CA3AF]/20', icon: '🌱' },
@@ -167,8 +201,12 @@ export default function LeaderboardTable({ currentUserAddress }) {
     useEffect(() => { fetchLeaderboard() }, [fetchLeaderboard])
 
     const { users, total_users, user_rank } = data
-    const maxScore = users[0]?.reputation_score || 1
-    const visibleUsers = users.slice(0, showCount)
+    // Merge elite users at top, then real users (skip any real user that matches elite address)
+    const eliteAddrs = new Set(ELITE_USERS.map(e => e.wallet_address.toLowerCase()))
+    const realUsers = users.filter(u => !eliteAddrs.has(u.wallet_address?.toLowerCase()))
+    const allUsers = [...ELITE_USERS, ...realUsers]
+    const maxScore = ELITE_USERS[0].reputation_score
+    const visibleUsers = allUsers.slice(0, showCount + ELITE_USERS.length)
 
     // ── Loading skeleton ──
     if (loading) {
@@ -245,70 +283,100 @@ export default function LeaderboardTable({ currentUserAddress }) {
                         const levelInfo = getUserLevel(user.reputation_score || 0)
                         const lvlStyle = LEVEL_STYLES[levelInfo.level] || LEVEL_STYLES[1]
                         const isTop3 = rank <= 3
+                        const isElite = !!user._elite
+                        // Insert divider before first real user
+                        const showDivider = index === ELITE_USERS.length
 
                         return (
-                            <motion.div
-                                key={user.id || index}
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.04 }}
-                                className={`rounded-xl border p-3 transition-all duration-200
+                            <>
+                                {showDivider && (
+                                    <div className="flex items-center gap-3 py-1">
+                                        <div className="flex-1 h-px bg-white/6" />
+                                        <span className="text-white/20 text-[10px] font-semibold uppercase tracking-widest shrink-0">Community Rankings</span>
+                                        <div className="flex-1 h-px bg-white/6" />
+                                    </div>
+                                )}
+                                <motion.div
+                                    key={user.id || index}
+                                    initial={{ opacity: 0, y: 8 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.04 }}
+                                    className={`rounded-xl border p-3 transition-all duration-200
                                     ${isCurrentUser
-                                        ? 'border-[#C6FF1A]/30 bg-[#C6FF1A]/5'
-                                        : isTop3
-                                            ? 'border-white/10 bg-white/3 hover:bg-white/4'
-                                            : 'border-white/5 bg-white/1 hover:border-white/10 hover:bg-white/3'
-                                    }`}
-                                style={isCurrentUser ? { boxShadow: '0 0 16px rgba(198,255,26,0.08)' } : {}}
-                            >
-                                <div className="flex items-center gap-3">
-                                    {/* Rank badge */}
-                                    <RankBadge rank={rank} />
+                                            ? 'border-[#C6FF1A]/30 bg-[#C6FF1A]/5'
+                                            : isElite && rank === 1
+                                                ? 'border-[#C6FF1A]/20 bg-[#C6FF1A]/4'
+                                                : isElite && rank === 2
+                                                    ? 'border-[#FBBF24]/15 bg-[#FBBF24]/3'
+                                                    : isElite && rank === 3
+                                                        ? 'border-[#A78BFA]/15 bg-[#A78BFA]/3'
+                                                        : 'border-white/5 bg-white/1 hover:border-white/10 hover:bg-white/3'
+                                        }`}
+                                    style={isCurrentUser ? { boxShadow: '0 0 16px rgba(198,255,26,0.08)' }
+                                        : isElite ? { boxShadow: `0 0 12px ${user._badgeColor}18` } : {}}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        {/* Rank badge */}
+                                        <RankBadge rank={rank} />
 
-                                    {/* Address + level */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap">
-                                            <span className={`font-bold font-mono text-sm truncate ${isCurrentUser ? 'text-[#C6FF1A]' : 'text-white/80'}`}>
-                                                {truncAddr(user.wallet_address)}
-                                            </span>
-                                            {isCurrentUser && (
-                                                <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-[#C6FF1A] text-black text-[9px] font-black uppercase tracking-wider">
-                                                    You
+                                        {/* Address + level */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span className={`font-bold font-mono text-sm truncate ${isCurrentUser ? 'text-[#C6FF1A]' : 'text-white/80'}`}>
+                                                    {truncAddr(user.wallet_address)}
                                                 </span>
-                                            )}
-                                            {rank === 1 && (
-                                                <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-[#FBBF24]/15 border border-[#FBBF24]/30 text-[#FBBF24] text-[9px] font-bold">
-                                                    🔥 Leader
+                                                {isCurrentUser && (
+                                                    <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-[#C6FF1A] text-black text-[9px] font-black uppercase tracking-wider">
+                                                        You
+                                                    </span>
+                                                )}
+                                                {/* Elite badge replaces generic Leader badge */}
+                                                {isElite && (
+                                                    <span
+                                                        className="shrink-0 px-1.5 py-0.5 rounded-md border text-[9px] font-bold"
+                                                        style={{
+                                                            color: user._badgeColor,
+                                                            borderColor: `${user._badgeColor}40`,
+                                                            background: `${user._badgeColor}12`,
+                                                        }}
+                                                    >
+                                                        {user._badge}
+                                                    </span>
+                                                )}
+                                                {!isElite && rank === 1 && (
+                                                    <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-[#FBBF24]/15 border border-[#FBBF24]/30 text-[#FBBF24] text-[9px] font-bold">
+                                                        🔥 Leader
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                {/* Level pill */}
+                                                <span
+                                                    className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-semibold ${lvlStyle.bg} ${lvlStyle.border}`}
+                                                    style={{ color: lvlStyle.color }}
+                                                >
+                                                    {lvlStyle.icon} Lv.{levelInfo.level}
                                                 </span>
-                                            )}
+                                                <span className="text-white/20 text-[10px]">·</span>
+                                                <span className="text-white/30 text-[10px]">{user.total_contributions || 0} tasks</span>
+                                            </div>
+                                            {/* Score bar */}
+                                            <ScoreBar score={user.reputation_score || 0} maxScore={maxScore} />
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            {/* Level pill */}
-                                            <span
-                                                className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md border text-[9px] font-semibold ${lvlStyle.bg} ${lvlStyle.border}`}
-                                                style={{ color: lvlStyle.color }}
+
+                                        {/* Score */}
+                                        <div className="text-right shrink-0">
+                                            <div
+                                                className="font-black text-base leading-none"
+                                                style={{ color: isCurrentUser ? '#C6FF1A' : isElite ? user._badgeColor : 'white' }}
                                             >
-                                                {lvlStyle.icon} Lv.{levelInfo.level}
-                                            </span>
-                                            <span className="text-white/20 text-[10px]">·</span>
-                                            <span className="text-white/30 text-[10px]">{user.total_contributions || 0} tasks</span>
+                                                {formatNum(user.reputation_score || 0)}
+                                            </div>
+                                            <div className="text-white/25 text-[9px] font-semibold uppercase tracking-wider mt-0.5">pts</div>
                                         </div>
-                                        {/* Score bar */}
-                                        <ScoreBar score={user.reputation_score || 0} maxScore={maxScore} />
                                     </div>
-
-                                    {/* Score */}
-                                    <div className="text-right shrink-0">
-                                        <div
-                                            className="font-black text-base leading-none"
-                                            style={{ color: isCurrentUser ? '#C6FF1A' : isTop3 ? '#FBBF24' : 'white' }}
-                                        >
-                                            {formatNum(user.reputation_score || 0)}
-                                        </div>
-                                        <div className="text-white/25 text-[9px] font-semibold uppercase tracking-wider mt-0.5">pts</div>
-                                    </div>
-                                </div>
-                            </motion.div>
+                                </motion.div>
+                            </>
                         )
                     }) : (
                         <motion.div
@@ -323,17 +391,19 @@ export default function LeaderboardTable({ currentUserAddress }) {
                             <p className="text-white/20 text-xs mt-1">Be the first to climb the ranks!</p>
                         </motion.div>
                     )}
-                </AnimatePresence>
+                </AnimatePresence >
 
                 {/* Show more */}
-                {users.length > showCount && (
-                    <button
-                        onClick={() => setShowCount(c => c + 10)}
-                        className="w-full py-2.5 rounded-xl border border-white/8 bg-white/2 text-white/40 hover:text-white/70 hover:border-white/15 text-xs font-semibold transition-all mt-2"
-                    >
-                        Show more ({users.length - showCount} remaining)
-                    </button>
-                )}
+                {
+                    users.length > showCount && (
+                        <button
+                            onClick={() => setShowCount(c => c + 10)}
+                            className="w-full py-2.5 rounded-xl border border-white/8 bg-white/2 text-white/40 hover:text-white/70 hover:border-white/15 text-xs font-semibold transition-all mt-2"
+                        >
+                            Show more ({allUsers.length - (showCount + ELITE_USERS.length)} remaining)
+                        </button>
+                    )
+                }
             </div>
 
             {/* ── Footer ── */}
