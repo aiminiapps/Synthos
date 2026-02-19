@@ -19,6 +19,7 @@ import {
     RiRobot2Line,
     RiShieldCheckLine,
 } from 'react-icons/ri'
+import Image from 'next/image'
 
 export default function DashboardPage() {
     const { address, isConnected } = useAccount()
@@ -146,27 +147,7 @@ export default function DashboardPage() {
                             onClick={() => router.push('/')}
                             className="flex items-center gap-2.5 cursor-pointer group shrink-0"
                         >
-                            <div
-                                className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-                                style={{
-                                    background: 'linear-gradient(135deg, rgba(198,255,26,0.2), rgba(198,255,26,0.05))',
-                                    border: '1px solid rgba(198,255,26,0.3)',
-                                    boxShadow: '0 0 12px rgba(198,255,26,0.15)',
-                                }}
-                            >
-                                <RiRobot2Line className="text-[#C6FF1A] text-sm" />
-                            </div>
-                            <div className="flex items-baseline gap-1.5">
-                                <span
-                                    className="font-black text-base tracking-tight"
-                                    style={{ color: '#C6FF1A', textShadow: '0 0 20px rgba(198,255,26,0.4)' }}
-                                >
-                                    SYNTHOS
-                                </span>
-                                <span className="text-white/20 text-[10px] font-semibold uppercase tracking-widest hidden sm:inline">
-                                    AI
-                                </span>
-                            </div>
+                            <Image src="/logo.png" alt="Logo" width={150} height={70} />
                         </motion.div>
 
                         {/* ── Center nav ── */}
