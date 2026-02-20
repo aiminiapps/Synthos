@@ -5,10 +5,11 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useRef, useState, useEffect } from 'react'
 import {
-    RiArrowRightLine, RiFlashlightLine,
+    RiArrowRightLine,
     RiShieldStarLine, RiCheckLine, RiGlobalLine,
     RiBarChartLine, RiTokenSwapLine,
 } from 'react-icons/ri'
+import Orb from './ui/Orb'
 
 // ─── Animated count ───────────────────────────────────────────────────────────
 function CountUp({ target, prefix = '', suffix = '' }) {
@@ -56,20 +57,33 @@ export default function HeroSection() {
             ref={sectionRef}
             className="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 pt-28 pb-20 overflow-hidden"
         >
-            {/* Single subtle top radial */}
+            {/* ── Orb — absolute full-cover background ── */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 0,
+                    opacity: 0.88,
+                    pointerEvents: 'auto',
+                }}
+            >
+                <Orb
+                    hoverIntensity={0.5}
+                    rotateOnHover
+                    hue={80}
+                    forceHoverState={false}
+                    backgroundColor="#060A07"
+                />
+            </div>
+
+            {/* Thin center rule — above orb */}
             <div
                 aria-hidden
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%, rgba(198,255,26,0.05) 0%, transparent 65%)' }}
+                className="absolute left-0 right-0 pointer-events-none"
+                style={{ top: '50%', height: 1, zIndex: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)' }}
             />
 
-            {/* Thin center rule */}
-            <div
-                aria-hidden
-                className="absolute left-0 right-0"
-                style={{ top: '50%', height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent)' }}
-            />
-
+            {/* ── All text content — z-10 ── */}
             <motion.div
                 style={{ y, opacity }}
                 className="relative z-10 w-full max-w-5xl mx-auto"
@@ -95,7 +109,7 @@ export default function HeroSection() {
                     >
                         Complete precision micro-tasks that improve AI systems,
                         and receive <span className="text-white/75 font-medium">SYNTR tokens</span> directly
-                        to your BNB Chain wallet no middlemen, no delays.
+                        to your BNB Chain wallet — no middlemen, no delays.
                     </p>
                 </motion.div>
 
@@ -117,7 +131,7 @@ export default function HeroSection() {
                             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                             style={{ background: 'linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.22) 50%, transparent 65%)' }}
                         />
-                        <Image src="/icon.png" alt="Logo" width={30} height={30} />
+                        <Image src="/icon.png" alt="icon" width={24} height={24} className="relative z-10 shrink-0" />
                         <span className="relative z-10">Launch Dashboard</span>
                         <RiArrowRightLine className="text-sm relative z-10 group-hover:translate-x-0.5 transition-transform duration-200" />
                     </motion.button>
@@ -150,7 +164,7 @@ export default function HeroSection() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.4 }}
-                    className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2.5 mb-20"
+                    className="flex flex-wrap items-center justify-center gap-x-7 gap-y-2.5"
                 >
                     {[
                         { icon: RiShieldStarLine, label: 'Non-custodial', color: '#34D399' },
