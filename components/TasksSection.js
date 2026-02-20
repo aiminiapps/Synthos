@@ -11,6 +11,7 @@ import {
     RiFireLine, RiStarLine, RiRefreshLine, RiLoader4Line
 } from 'react-icons/ri'
 import RewardAnimation from './RewardAnimation'
+import Image from 'next/image'
 
 // ─── Category Config ──────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -439,9 +440,8 @@ export default function TasksSection({ tasks = [], userAddress, userLevel, onTas
                     onClick={() => setShowAIPanel(!showAIPanel)}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#60A5FA]/30 bg-[#60A5FA]/10 text-[#60A5FA] text-sm font-semibold hover:bg-[#60A5FA]/20 transition-all"
                 >
-                    <RiRobot2Line className="text-base" />
+                    <Image src="/icon.png" alt="Logo" width={25} height={25} />
                     AI Generate Tasks
-                    <RiSparklingLine className="text-xs" />
                 </motion.button>
             </div>
 
@@ -455,7 +455,6 @@ export default function TasksSection({ tasks = [], userAddress, userLevel, onTas
                         className="rounded-2xl border border-[#60A5FA]/25 bg-gradient-to-br from-[#60A5FA]/10 to-[#60A5FA]/3 p-5 overflow-hidden"
                     >
                         <div className="flex items-center gap-2 mb-4">
-                            <RiRobot2Line className="text-[#60A5FA] text-xl" />
                             <h3 className="text-white font-bold">AI Task Generator</h3>
                             <span className="text-xs text-white/30 ml-auto">Powered by Mistral 7B</span>
                         </div>

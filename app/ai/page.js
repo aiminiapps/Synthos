@@ -28,6 +28,7 @@ export default function DashboardPage() {
     const [tasks, setTasks] = useState([])
     const [loading, setLoading] = useState(true)
     const [refreshKey, setRefreshKey] = useState(0)
+    const isFirstLoad = refreshKey === 0
 
     useEffect(() => {
         if (!isConnected) {
@@ -38,7 +39,8 @@ export default function DashboardPage() {
     }, [address, isConnected, router, refreshKey])
 
     const fetchData = async () => {
-        setLoading(true)
+        // Only show full skeleton on first load; silent refresh otherwise
+        if (isFirstLoad) setLoading(true)
         try {
             const [profileRes, tasksRes] = await Promise.all([
                 fetch(`/api/profile?address=${address}`),
@@ -70,11 +72,98 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#080C09] flex items-center justify-center">
-                <div className="text-center">
-                    <RiLoader4Line className="text-[#C6FF1A] text-4xl animate-spin mx-auto mb-4" />
-                    <p className="text-white/40 text-sm">Loading your dashboard...</p>
+            <div className="min-h-screen bg-[#080C09]" style={{ backgroundImage: 'radial-gradient(ellipse at 20% 0%, rgba(198,255,26,0.04) 0%, transparent 60%)' }}>
+                {/* Skeleton header */}
+                <header className="sticky top-0 z-50">
+                    <div className="max-w-[1500px] mx-auto px-4 sm:px-6 pt-3 pb-1">
+                        <div className="flex items-center justify-between px-5 py-3 rounded-2xl border border-white/6 bg-white/2">
+                            <div className="h-8 w-32 rounded-xl bg-white/5 animate-pulse" />
+                            <div className="h-9 w-36 rounded-xl bg-white/5 animate-pulse" />
+                        </div>
+                    </div>
+                </header>
+
+                <div className="max-w-[1500px] mx-auto px-4 sm:px-6 py-8 space-y-8">
+                    {/* Stat cards skeleton */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="rounded-2xl border border-white/6 bg-white/2 p-5" style={{ opacity: 1 - i * 0.15 }}>
+                                <div className="flex items-center justify-between mb-4">
+                                    <div className="h-3 w-20 rounded-full bg-white/8 animate-pulse" />
+                                    <div className="w-7 h-7 rounded-lg bg-white/8 animate-pulse" />
+                                </div>
+                                <div className="h-7 w-24 rounded-lg bg-white/10 animate-pulse" />
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Main grid skeleton */}
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+                        {/* Task list skeleton */}
+                        <div className="xl:col-span-2 space-y-3">
+                            {/* Header */}
+                            <div className="flex justify-between items-center mb-4">
+                                <div className="h-7 w-40 rounded-xl bg-white/8 animate-pulse" />
+                                <div className="h-9 w-36 rounded-xl bg-white/6 animate-pulse" />
+                            </div>
+                            {/* Category tabs */}
+                            <div className="flex gap-2 overflow-hidden">
+                                {[...Array(5)].map((_, i) => (
+                                    <div key={i} className="h-9 rounded-xl bg-white/5 animate-pulse shrink-0" style={{ width: 80 + i * 10 }} />
+                                ))}
+                            </div>
+                            {/* Task rows */}
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="rounded-2xl border border-white/6 bg-white/2 p-5" style={{ opacity: 1 - i * 0.2 }}>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1 space-y-3">
+                                            <div className="flex gap-2">
+                                                <div className="h-5 w-14 rounded-lg bg-white/8 animate-pulse" />
+                                                <div className="h-5 w-20 rounded-lg bg-white/6 animate-pulse" />
+                                            </div>
+                                            <div className="h-4 w-3/4 rounded-full bg-white/10 animate-pulse" />
+                                            <div className="h-3 w-full rounded-full bg-white/5 animate-pulse" />
+                                            <div className="h-3 w-2/3 rounded-full bg-white/5 animate-pulse" />
+                                        </div>
+                                        <div className="rounded-xl bg-white/6 px-4 py-3 text-center shrink-0 animate-pulse">
+                                            <div className="h-4 w-12 rounded bg-white/10" />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Right panel skeleton */}
+                        <div className="space-y-4">
+                            {[140, 200, 260].map((h, i) => (
+                                <div key={i} className="rounded-2xl border border-white/6 bg-white/2 p-5">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <div className="w-8 h-8 rounded-xl bg-white/8 animate-pulse" />
+                                        <div className="h-4 w-28 rounded-full bg-white/8 animate-pulse" />
+                                    </div>
+                                    <div className="space-y-3">
+                                        {[...Array(3)].map((_, j) => (
+                                            <div key={j} className="h-10 rounded-xl bg-white/4 animate-pulse" style={{ opacity: 1 - j * 0.2 }} />
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
+
+                {/* Shimmer overlay */}
+                <style>{`
+                    @keyframes shimmer {
+                        0% { background-position: -200% 0; }
+                        100% { background-position: 200% 0; }
+                    }
+                    .animate-pulse {
+                        background-image: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.04) 50%, transparent 75%);
+                        background-size: 200% 100%;
+                        animation: shimmer 1.8s infinite;
+                    }
+                `}</style>
             </div>
         )
     }
