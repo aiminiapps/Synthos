@@ -11,7 +11,7 @@ const steps = [
 
 export default function HowItWorks() {
     return (
-        <section id="how-it-works" className="py-28 px-4 sm:px-6">
+        <section id="how-it-works" className="py- px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -19,10 +19,6 @@ export default function HowItWorks() {
                     viewport={{ once: true }}
                     className="text-center mb-14"
                 >
-                    <span className="inline-block text-[#C6FF1A] text-[10px] font-bold uppercase tracking-[0.22em] mb-3 px-3 py-1 rounded-full border border-[#C6FF1A]/18"
-                        style={{ background: 'rgba(198,255,26,0.05)' }}>
-                        Simple Process
-                    </span>
                     <h2 className="text-3xl md:text-4xl font-black text-white mt-4 mb-3 tracking-tight">
                         How <span style={{ color: '#C6FF1A' }}>SYNTHOS</span> Works
                     </h2>
