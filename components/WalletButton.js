@@ -165,7 +165,7 @@ function WalletButtonContent() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowDropdown(v => !v)}
-                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border font-semibold text-sm transition-all"
+                className="flex items-center gap-2.5 sm:px-4 px-1.5 py-2.5 rounded-xl border font-semibold sm:text-sm text-[10px] transition-all"
                 style={{
                     color: '#C6FF1A',
                     borderColor: 'rgba(198,255,26,0.25)',
