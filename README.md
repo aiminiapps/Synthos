@@ -149,3 +149,4 @@ MIT License
 ---
 
 Built with 💚 by the SYNTHOS team
+# Synthos
