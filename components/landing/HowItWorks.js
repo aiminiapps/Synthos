@@ -13,8 +13,7 @@ function SectionHeading() {
     return (
         <div className="text-center mb-16">
             <h2
-                className="font-black text-white tracking-tight"
-                style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', letterSpacing: '-0.025em' }}
+                className="text-3xl md:text-4xl font-black text-white mt-4 mb-3 tracking-tight"
             >
                 How&nbsp;<span style={{ color: '#C6FF1A' }}>SYNTHOS</span>&nbsp;Works
             </h2>
@@ -48,10 +47,10 @@ function Card({ step, color, title, desc, children, delay = 0 }) {
             {/* Header */}
             <div className="px-6 pt-7 pb-5 flex-shrink-0">
                 <div className="flex items-start justify-between mb-4">
-                    <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                    {/* <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
                         style={{ background: `${color}12`, border: `1px solid ${color}25` }}>
                         <span className="text-xs font-black" style={{ color }}>{step}</span>
-                    </div>
+                    </div> */}
                     <span className="text-white/12 text-5xl font-black leading-none select-none"
                         style={{ color: `${color}12` }}>{String(step).padStart(2, '0')}</span>
                 </div>
@@ -419,7 +418,7 @@ export default function HowItWorks() {
     ]
 
     return (
-        <section id="how-it-works" className="px-4 sm:px-6 py-24">
+        <section id="how-it-works" className="px-4 sm:px-6 py-14">
             <div className="max-w-6xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -433,20 +432,6 @@ export default function HowItWorks() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     {cards.map((c) => (
                         <Card key={c.step} {...c} />
-                    ))}
-                </div>
-
-                {/* Connecting arrows (desktop only) */}
-                <div className="hidden md:flex justify-center items-center gap-4 mt-10 pointer-events-none select-none">
-                    {[0, 1].map(i => (
-                        <motion.div
-                            key={i}
-                            animate={{ x: [0, 5, 0], opacity: [0.2, 0.5, 0.2] }}
-                            transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.6, ease: 'easeInOut' }}
-                            className="flex items-center gap-1 text-white/20"
-                        >
-                            <RiArrowRightLine className="text-sm" />
-                        </motion.div>
                     ))}
                 </div>
             </div>
