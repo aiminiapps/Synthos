@@ -109,7 +109,7 @@ export default function HeroSection() {
                     >
                         Complete precision micro-tasks that improve AI systems,
                         and receive <span className="text-white/75 font-medium">SYNTR tokens</span> directly
-                        to your BNB Chain wallet — no middlemen, no delays.
+                        to your BNB Chain wallet no middlemen, no delays.
                     </p>
                 </motion.div>
 
