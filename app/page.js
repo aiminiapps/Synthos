@@ -7,6 +7,7 @@ import Image from 'next/image'
 import WalletButton from '@/components/WalletButton'
 import HeroSection from '@/components/landing/HeroSection'
 import HowItWorks from '@/components/landing/HowItWorks'
+import AboutSection from '@/components/landing/AboutSection'
 import FeaturesSection from '@/components/landing/FeaturesSection'
 import CommunitySection from '@/components/landing/CommunitySection'
 import CTABanner from '@/components/landing/CTABanner'
@@ -236,6 +237,7 @@ export default function HomePage() {
             <main>
                 <HeroSection />
                 <HowItWorks />
+                <AboutSection />
                 <FeaturesSection />
                 <CommunitySection />
                 <CTABanner />
