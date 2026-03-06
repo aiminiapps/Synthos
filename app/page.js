@@ -14,6 +14,14 @@ import CTABanner from '@/components/landing/CTABanner'
 import LandingFooter from '@/components/landing/LandingFooter'
 import { RiMenuLine, RiCloseLine, RiArrowRightLine } from 'react-icons/ri'
 
+function XIcon({ size = 15 }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622Zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+        </svg>
+    )
+}
+
 // ─── NavLink ─────────────────────────────────────────────────────────────────
 function NavLink({ label, onClick }) {
     return (
@@ -171,6 +179,24 @@ export default function HomePage() {
 
                         {/* Right side */}
                         <div className="flex items-center gap-3">
+                            {/* X (Twitter) link */}
+                            <motion.a
+                                href="https://x.com/SYNTHOS_AI"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                whileHover={{ scale: 1.08 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl border transition-all duration-200"
+                                style={{
+                                    borderColor: 'rgba(198,255,26,0.3)',
+                                    background: 'rgba(198,255,26,0.08)',
+                                    color: '#C6FF1A',
+                                }}
+                                title="Follow @SYNTHOS_AI on X"
+                            >
+                                <XIcon size={14} />
+                            </motion.a>
+
                             <motion.button
                                 whileHover={{ scale: 1.03 }}
                                 whileTap={{ scale: 0.97 }}
@@ -216,13 +242,24 @@ export default function HomePage() {
                                             {item.label}
                                         </button>
                                     ))}
-                                    <div className="pt-2 border-t border-white/6">
+                                    <div className="pt-2 border-t border-white/6 space-y-1">
                                         <button
                                             onClick={() => { router.push('/ai'); setMobileOpen(false) }}
                                             className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold text-[#C6FF1A] hover:bg-[#C6FF1A]/8 transition-all"
                                         >
                                             → Launch Dashboard
                                         </button>
+                                        <a
+                                            href="https://x.com/SYNTHOS_AI"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => setMobileOpen(false)}
+                                            className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                                            style={{ color: '#C6FF1A' }}
+                                        >
+                                            <XIcon size={13} />
+                                            Follow @SYNTHOS_AI
+                                        </a>
                                     </div>
                                 </div>
                             </motion.div>
