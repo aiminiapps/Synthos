@@ -200,7 +200,7 @@ export default function LeaderboardTable({ currentUserAddress }) {
 
     useEffect(() => { fetchLeaderboard() }, [fetchLeaderboard])
 
-    const { users, total_users, user_rank } = data
+    const { users = [], total_users, user_rank } = data
     // Merge elite users at top, then real users (skip any real user that matches elite address)
     const eliteAddrs = new Set(ELITE_USERS.map(e => e.wallet_address.toLowerCase()))
     const realUsers = users.filter(u => !eliteAddrs.has(u.wallet_address?.toLowerCase()))
