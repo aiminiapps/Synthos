@@ -18,7 +18,7 @@ export default function LandingFooter() {
 
                 {/* X (Twitter) link */}
                 <a
-                    href="https://x.com/SYNTHOS_AI"
+                    href="https://x.com/Aisynthos"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-xl border transition-all duration-200 group"
